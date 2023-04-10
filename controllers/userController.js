@@ -15,16 +15,5 @@ exports.getAllUser = catchAsync( async (req, res, next) => {
       },
     });
   })
-  exports.GetUser=catchAsync(async (req,res,next)=>{
-    const user = await User.findById(req.params.id);
-    if(!user){
-      return next(new AppError("user not found",404));
-    }
-    res.status(200).json({
-      status:"success",
-      data:{
-        user:user
-      }
-    })
-  })
+ 
   
