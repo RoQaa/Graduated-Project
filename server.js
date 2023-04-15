@@ -13,10 +13,7 @@ const app = require(`./app.js`);
 //read all vars in config file as environment vars
 dotenv.config({path:'./config.env'}); 
 
-const DB = process.env.DATABASE.replace(
-    '<password>',process.env.PASSWORD
-)
-
+const DB =`mongodb+srv://Sohila:NAy4F4NPGo8IFfLg@cluster0.r5ya7rj.mongodb.net/test?retryWrites=true&w=majority`
 mongoose.connect(DB,{
     
   useNewUrlParser: true,
