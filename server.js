@@ -8,12 +8,15 @@ process.on('uncaughtException',err =>{
   process.exit(1)
 })
 
-const app = require(`./app.js`);
+const app = require(`${__dirname}/app.js`);
 
 //read all vars in config file as environment vars
 dotenv.config({path:'./config.env'}); 
 
-const DB =`mongodb+srv://Sohila:NAy4F4NPGo8IFfLg@cluster0.r5ya7rj.mongodb.net/test?retryWrites=true&w=majority`
+const DB = process.env.DATABASE.replace(
+    '<password>',process.env.PASSWORD
+)
+
 mongoose.connect(DB,{
     
   useNewUrlParser: true,
