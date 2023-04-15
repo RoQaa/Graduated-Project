@@ -1,6 +1,6 @@
 const express=require('express');
-const {getAllUsers,AddUser,GetUser,UpdatedUser,DeleteUser}=require('../controllers/userController');
-const authController=require('./../controllers/authController');
+const {getAllUsers,AddUser,GetUser,UpdatedUser,DeleteUser}=require(`${__dirname}/../controllers/userController`);
+const authController=require(`${__dirname}/../controllers/authController`);
 const router=express.Router();
 
 

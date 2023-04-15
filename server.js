@@ -8,7 +8,7 @@ process.on('uncaughtException',err =>{
   process.exit(1)
 })
 
-const app = require('./app.js');
+const app = require(`${__dirname}/app.js`);
 
 //read all vars in config file as environment vars
 dotenv.config({path:'./config.env'}); 

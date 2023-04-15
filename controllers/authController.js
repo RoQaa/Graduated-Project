@@ -1,9 +1,9 @@
 const jwt=require('jsonwebtoken');
 const {promisify}=require('util');
-const User =require('./../models/userModel');
-const {catchAsync}=require('./../utils/catchAsync');
-const AppError=require('./../utils/appError');
-const sendEmail=require('./../utils/email');
+const User =require(`${__dirname}/../models/userModel`);
+const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
+const AppError=require(`${__dirname}/../utils/appError`);
+const sendEmail=require(`${__dirname}/../utils/email`);
  
 const signToken= (id)=>{
     const token=jwt.sign({id:id},process.env.JWT_SECRET,{
