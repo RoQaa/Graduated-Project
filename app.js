@@ -2,7 +2,7 @@ const morgan = require('morgan'); //library simulation middleware fn
 const express = require('express');
 const userRouter = require(`./routes/userRoutes`)
 const AppError = require(`./utils/appError`)
-const globalErrorHandler = require(`./controllers/errorController`)
+//const globalErrorHandler = require(`./controllers/errorController`)
 
 
 const app = express();
@@ -27,6 +27,6 @@ app.all('*',(req,res,next)=>{
 })
 
 // instead of html error and repeated this block in all ops
-app.use(globalErrorHandler)
+//app.use(globalErrorHandler)
 
 module.exports = app
