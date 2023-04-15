@@ -1,8 +1,8 @@
 const morgan = require('morgan'); //library simulation middleware fn 
 const express = require('express');
-const userRouter = require(`${__dirname}/routes/userRoutes`)
-const AppError = require(`${__dirname}/utils/appError`)
-const globalErrorHandler = require(`${__dirname}/controllers/errorController`)
+const userRouter = require(`./routes/userRoutes`)
+const AppError = require(`./utils/appError`)
+const globalErrorHandler = require(`./controllers/errorController`)
 
 
 const app = express();
