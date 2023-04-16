@@ -1,6 +1,6 @@
 const express=require('express');
 const router=express.Router();
-const tourController=require(`${__dirname}/../Controllers/tourController`);
+const tourController=require('./../Controllers/tourController');
 const authController=require(`${__dirname}/../Controllers/authController`);
 
 //  router.param('id',tourController.checkId);
