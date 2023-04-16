@@ -35,7 +35,7 @@ app.delete('/api/v1/tours/:id', DeleteTour);
 
 
 //app.use('/api/v1/tours',tourRouter);
-app.use('/api/v1/users',userRouter);
+//app.use('/api/v1/users',userRouter);
 
 
 app.all('*',(req,res,next)=>{
