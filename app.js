@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const AppError=require('./utils/appError');
-const tourRouter=require('./Routes/tourRouter');
+//const tourRouter=require('./Routes/tourRouter');
 const userRouter=require('./Routes/userRouter');
 const globalErrorHandler=require('./Controllers/errorController');
 const app = express();
@@ -34,7 +34,7 @@ app.delete('/api/v1/tours/:id', DeleteTour);
 //Routes
 
 
-app.use('/api/v1/tours',tourRouter);
+//app.use('/api/v1/tours',tourRouter);
 app.use('/api/v1/users',userRouter);
 
 
