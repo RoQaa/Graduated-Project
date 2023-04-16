@@ -14,7 +14,7 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:[true,'Must has a Password'],
         trim:true,
-        minlength:[8,'At least has 8 charachters'],
+        minlength:[8,' Password At least has 8 charachters'],
         select:false // make it invisible when get all users 
         },
     passwordConfirm:{
@@ -48,33 +48,67 @@ const userSchema=new mongoose.Schema({
         default:Date.now(),
         select:false// mby5li4 3l this ya4ta8l
     },
-    passwordChangedAt:Date
+    passwordChangedAt:{
+        type:Date
+       
+    },
+    passwordResetToken:String,
+    passwordResetExpires:Date,
+    active:{
+        type:Boolean,
+        default:true
+    }
     
 
 })
+
+// DOCUMENT MIDDLEWARE 
 userSchema.pre('save',async function(next){
     //only run if password modified
     if(!this.isModified('password')){
         return next();
     }
     //hash password
-    this.password= await bcrypt.hash(this.password,12);
+    this.password= await bcrypt.hash(this.password,12); 
     this.passwordConfirm=undefined;
     next();
 })
+userSchema.pre('save',function(next){
+    if(!this.isModified('password')|| this.isNew){
+        return next();
+    }
+    this.passwordChangedAt=Date.now()-1000; // => 1000 is 1 sec
+    next();
+})
+//Query Middle Wares
+userSchema.pre(/^find/,  function(next){
+     this.find({active:{$ne:false}})
+    next();
+})
+
+
+
+
+
 //instance method
 userSchema.methods.correctPassword= async function(candidatePassword,userPassword){
     return await bcrypt.compare(candidatePassword,userPassword)// compare bt3mal hash le candidate we btcompare b3deha
 }
+
+
+
 userSchema.methods.changesPasswordAfter=function(JWTTimestamps){
    
     if(this.passwordChangedAt){
-        const changedTimestamps=parseInt(this.passwordChangedAt.getTime()/1000,10);
+        const changedTimestamps=parseInt(this.passwordChangedAt.getTime()/1000,10); //=> 10 min
         //console.log(changedTimestamps,JWTTimestamps);
         return JWTTimestamps < changedTimestamps;
     }
     return false;
 }
+
+
+
 userSchema.methods.createPasswordRestToken = function() {
     const resetToken = crypto.randomBytes(32).toString('hex');
   
@@ -85,9 +119,13 @@ userSchema.methods.createPasswordRestToken = function() {
   
     console.log({ resetToken }, this.passwordResetToken);
   
-    this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //=> vallid for 10 minutes
   
     return resetToken;
   };
+
+
+
+
 const User=mongoose.model('User',userSchema);
 module.exports=User;

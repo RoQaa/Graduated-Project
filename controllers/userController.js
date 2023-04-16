@@ -10,10 +10,18 @@
 //   }
 //   next();
 // }
-const User=require(`${__dirname}/../models/userModel`)
-const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
-const AppError=require(`${__dirname}/../utils/appError`);
+const User=require('./../models/userModel')
+const {catchAsync}=require('./../utils/catchAsync');
+const AppError=require('./../utils/appError');
 
+
+const filterObj=(obj,...allowedFields)=>{
+  const newObj={};
+  Object.keys(obj).forEach(el=>{
+      if(allowedFields.includes(el)) newObj[el]=obj[el]
+  });
+  return newObj;
+}
 exports. DeleteUser=catchAsync(async(req,res,next)=>{
    
    const deletedUser=await User.findByIdAndDelete(req.params.id)
@@ -46,16 +54,47 @@ catch(err){
 }
   
  
-  exports. UpdatedUser=(req,res)=>{
-   
+  exports.UpdatedUser=catchAsync(async(req,res,next)=>{
     
-    
-    res.status(200).res.json({
-      status: 'success',
-      requestedTime: req.requestTime,
-      data:"<>USers is Updated<>"
+    if(req.body.password||req.body.passwordConfirm){
+      return next(
+        new AppError
+        ("Password not provided here in that route please go to update password route"
+        ,400)
+        )
+    }
+
+   const filterBody=filterObj(req.body,'name','email')
+    const updatedUser= await User.findByIdAndUpdate(req.user.id,filterBody
+      ,{
+        new:true,
+        runValidators:true
+      })
+    res.status(200).json({
+      status:"success",
+      user:updatedUser
     })
-  }
+   
+  })
+
+exports.deletedMe=catchAsync(async (req,res,next) => {
+  await User.findByIdAndUpdate(req.user.id,{active:false},{
+    new:true,
+    runValidators:true
+  })
+
+  res.status(204).json({
+    status:"success",
+    data:null
+  })
+  
+}
+  )
+
+
+
+
+
   exports.GetUser=catchAsync(async (req,res,next)=>{
     const user = await User.findById(req.params.id);
     if(!user){
