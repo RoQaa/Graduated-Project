@@ -1,5 +1,5 @@
 const Tour=require(`${__dirname}/../models/tourModel`);
-const APIFeatures=require(`${__dirname}/../utils/APIFeatures`);
+const APIFeatures=require(`${__dirname}/../utils/apiFeatures`);
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`../utils/appError`);
 // const fs=require('fs');
