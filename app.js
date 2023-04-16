@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const AppError=require(`${__dirname}/utils/appError`);
 const tourRouter=require(`${__dirname}/Routes/tourRouter`);
 const userRouter=require(`${__dirname}/Routes/userRouter`);
-const globalErrorHandler=require(`${__dirname}/Controllers/errorController`);
+const globalErrorHandler=require(`${__dirname}/controllers/errorController`);
 const app = express();
 
 //MiddleWares

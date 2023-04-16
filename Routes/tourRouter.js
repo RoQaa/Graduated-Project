@@ -1,7 +1,7 @@
 const express=require('express');
 const router=express.Router();
-const tourController=require('../Controllers/tourController');
-const authController=require(`${__dirname}/../Controllers/authController`);
+const tourController=require('../controllers/tourController');
+const authController=require(`${__dirname}/../controllers/authController`);
 
 //  router.param('id',tourController.checkId);
 router.route('/stats-Tours').get(tourController.getTourStats);
@@ -17,3 +17,4 @@ router
   .patch(tourController.UpdateTour)
   .delete(authController.protect,authController.restrictTo('admin','lead-guide'),tourController.DeleteTour);
   module.exports=router;
+  //sdfsa
