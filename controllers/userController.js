@@ -10,9 +10,9 @@
 //   }
 //   next();
 // }
-const User=require('./../models/userModel')
-const {catchAsync}=require('./../utils/catchAsync');
-const AppError=require('./../utils/appError');
+const User=require(`${__dirname}/../models/userModel`);
+const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
+const AppError=require(`${__dirname}/../utils/appError`);
 
 
 const filterObj=(obj,...allowedFields)=>{

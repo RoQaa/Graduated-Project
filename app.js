@@ -1,9 +1,9 @@
 const express = require('express');
 const morgan = require('morgan');
-const AppError=require('./utils/appError');
-//const tourRouter=require('./Routes/tourRouter');
-const userRouter=require('./Routes/userRouter');
-const globalErrorHandler=require('./Controllers/errorController');
+const AppError=require(`${__dirname}/utils/appError`);
+const tourRouter=require(`${__dirname}/Routes/tourRouter`);
+const userRouter=require(`${__dirname}/Routes/userRouter`);
+const globalErrorHandler=require(`${__dirname}/Controllers/errorController`);
 const app = express();
 
 //MiddleWares
@@ -34,8 +34,8 @@ app.delete('/api/v1/tours/:id', DeleteTour);
 //Routes
 
 
-//app.use('/api/v1/tours',tourRouter);
-//app.use('/api/v1/users',userRouter);
+app.use('/tours',tourRouter);
+app.use('/users',userRouter);
 
 
 app.all('*',(req,res,next)=>{

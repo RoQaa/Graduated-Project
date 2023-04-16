@@ -1,7 +1,7 @@
 const express=require('express');
 const router=express.Router();
-//const tourController=require(`./../Controllers/tourController`);
-const authController=require('./../Controllers/authController');
+const tourController=require(`${__dirname}/../Controllers/tourController`);
+const authController=require(`${__dirname}/../Controllers/authController`);
 
 //  router.param('id',tourController.checkId);
 router.route('/stats-Tours').get(tourController.getTourStats);
