@@ -1,7 +1,7 @@
 const Tour=require(`${__dirname}/../models/tourModel`);
 const APIFeatures=require(`${__dirname}/../utils/APIFeatures`);
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
-const AppError=require(`./../utils/appError`);
+const AppError=require(`../utils/appError`);
 // const fs=require('fs');
 // const tours = JSON.parse(
 //     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf-8')
