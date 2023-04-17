@@ -17,8 +17,11 @@ const limiter =rateLimit({
   windowMs:60*60*1000,
   message:'too many requests please try again later'
 })
+
 app.use('/api',limiter) // (/api)=> all routes start with /api
+
 app.use(express.json()); //middle ware for req,res json files 3and req.body
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
 
