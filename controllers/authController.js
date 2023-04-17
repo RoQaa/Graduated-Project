@@ -13,8 +13,24 @@ const signToken= (id)=>{
     return token;
     
 }
+
+
 const createSendToken=(user,statusCode,res)=>{
 const token =signToken(user.id);
+
+const cookieOption={
+  expires:new Date (Date.now()+(process.env.JWT_COOKIE_EXPIRES_IN) *24*60*60*1000), //=> 90 days
+  httpOnly:true // be in http only
+}
+
+if(process.env.NODE_ENV==='production') cookieOption.secure=true // client cann't access it
+
+res.cookie('jwt',token,cookieOption); // save jwt in cookie
+
+//Remove password from output
+user.password=undefined;
+
+
 res.status(statusCode).json({
     status:"success",
     token,
@@ -24,6 +40,8 @@ res.status(statusCode).json({
 })
 
 }
+
+
 exports.SignUp=catchAsync(async(req,res,next)=>{
 const newUser=await User.create({  //create()  and save() doc
     name:req.body.name,
