@@ -1,11 +1,18 @@
 const jwt=require('jsonwebtoken');
 const crypto=require('crypto');
 const {promisify}=require('util');
+const client=require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN,{
+  lazyLoading:true
+});
 const User =require('../models/userModel');
 const {catchAsync}=require('../utils/catchAsync');
 const AppError=require('../utils/appError');
+const bcrypt=require('bcryptjs');
 const sendEmail=require('../utils/email');
- 
+
+// const bodyParser=require('body-parser');
+// const jsonParser=bodyParser.json();
+
 const signToken= (id)=>{
     const token=jwt.sign({id:id},process.env.JWT_SECRET,{
         expiresIn:process.env.JWT_EXPIRES_IN
@@ -43,14 +50,16 @@ res.status(statusCode).json({
 
 
 exports.SignUp=catchAsync(async(req,res,next)=>{
-const newUser=await User.create({  //create()  and save() doc
-    name:req.body.name,
-    email:req.body.email,
-    password:req.body.password,
-    passwordConfirm:req.body.passwordConfirm,
+const newUser=await User.create(req.body//create()  and save() doc
+ // {  
+   // name:req.body.name,
+   // email:req.body.email,
+   // password:req.body.password,
+   // passwordConfirm:req.body.passwordConfirm,
    // passwordChangedAt:req.body.passwordChangedAt,
-    role:req.body.role
-});
+   // role:req.body.role
+//}
+);
 
 if(!newUser){
   return next(new AppError(`Cannot Sign Up`,404) );
@@ -138,8 +147,83 @@ exports.restrictTo=(...roles)=>{ //function feha paramter we 3awz a7oot feha mid
     }
 
 }
-exports.forgotPassword = catchAsync(async (req, res, next) => {
+
+exports.forgotPassword=catchAsync(async (req,res,next) => {
+ const user=await User.findOne({email:req.body.email});
+ if(!user){
+  return next(new AppError('There is no user with email address.', 404));
+ }
+ createSendToken(user,200,res);
+})
+
+exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
+  let token;
+  if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+      token=req.headers.authorization.split(' ')[1];
+  }
+  if(!token){
+    return next(new AppError("Please Try to set email Again",401)) //401 => is not 'authorized
+  }
+  const decoded= await promisify(jwt.verify)(token,process.env.JWT_SECRET);
+  const user =  await User.findById(decoded.id);
+  const OTP= await user.generateOtp();
+  await user.save({ validateBeforeSave: false });
+
+  if(req.query.email){
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Your password reset token (valid for 10 min)',
+        name:user.name,
+        otp:OTP
+      });
+  
+      res.status(200).json({
+        status: true,
+        message: 'OTP sent to email!',
+        
+      });
+      
+    }
+    catch (err) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+    
+      return next(
+        new AppError(err),
+        500
+      );
+      }
+}
+if(req.query.phone){
+  const internationalFormat=`${user.phone}`; // err
+  try{
+      const otpResponse =await client
+      .verify
+      .v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verifications.create({
+          to:internationalFormat,
+          channel:"sms"
+      });
+      res.status(200).json({
+          message:"OTP send successfully",
+          otp:otpResponse
+      });
+  }
+  catch(err){
+      return new AppError(err,400);
+  }
+}
+
+})
+
+
+
+exports.forgotPasswordJ = catchAsync(async (req, res, next) => {
     // 1) Get user based on POSTed email
+    
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return next(new AppError('There is no user with email address.', 404));
@@ -147,7 +231,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   
     // 2) Generate the random reset token
     const resetToken = user.createPasswordRestToken();
-    const otp=Math.floor(Math.random()*90000) + 10000;
+    const OTP= await user.generateOtp();
     await user.save({ validateBeforeSave: false });
   
     // 3) Send it to user's email
@@ -157,31 +241,95 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   
     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: 
     ${resetURL}.
-    \nIf you didn't forget your password, please ignore this email!
-    the otb is ${otp}`;
+    \nIf you didn't forget your password, please ignore this email!, and the OTP IS ${OTP}`;
   
     try {
       await sendEmail({
         email: user.email,
         subject: 'Your password reset token (valid for 10 min)',
-        message
+        message,
+        name:user.name,
+        otp:OTP
       });
   
       res.status(200).json({
         status: 'success',
-        message: 'Token sent to email!'
+        message: 'Token sent to email!',
+        token:resetToken
       });
     } catch (err) {
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
       await user.save({ validateBeforeSave: false });
-  
+    
       return next(
-        new AppError('There was an error sending the email. Try again later!'),
+        new AppError(err),
         500
       );
     }
+   
+
   });
+
+
+
+
+exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
+  /**if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+    token=req.headers.authorization.split(' ')[1];
+} */
+if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+  token=req.headers.authorization.split(' ')[1];
+}
+  if(!req.body.otp || !token){
+    return next( new AppError("Please try  to send otp again to your mail",404));
+  }
+  
+  const cryptoOtp=crypto
+  .createHash('sha256')
+  .update(req.body.otp)
+  .digest('hex');
+
+  const user = await User.findOne({
+      passwordOtp:cryptoOtp,
+      passwordOtpExpires:{$gt:Date.now()}
+    })
+    
+  
+    if(!user){
+      return next(new AppError("OTP is invalid or has expired",400))
+    }
+    res.status(200).json({
+      status:"success",
+      message:"OTP is valid You can now reset password"
+    })
+})
+
+
+
+
+exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
+  const otp=req.body.otp;
+  try{
+    const verifiedResponse = await client
+    .verify
+    .v2
+    .services(process.env.TWILIO_SERVICE_SID)
+    .verificationChecks.create({
+      to:`+201156582961`,
+      code:otp,
+    });
+    res.status(200).json({
+      message:"OTP is verified Success",
+      verify:verifiedResponse
+    })
+  }
+  catch(err){
+    return new AppError(err,400);
+  }
+})
+
+
 exports.resetPassword=catchAsync(async(req,res,next)=>{
   // 1-GET USER BASED ON TOKEN
 const hashedToken=crypto.createHash('sha256').update(req.params.token).digest('hex');
@@ -198,6 +346,8 @@ user.password=req.body.password;
 user.passwordConfirm=req.body.passwordConfirm;
 user.passwordResetExpires=undefined;
 user.passwordResetToken=undefined;
+user.passwordOtp=undefined;
+user.passwordOtpExpires=undefined;
 await user.save({validateBeforeSave:false});
 //3-
  //4-
@@ -233,7 +383,6 @@ exports.updatePassword=catchAsync(async(req,res,next)=>{ //settings  hy48lha b3d
   createSendToken(user, 200, res);
 
 })
-
 
 
 

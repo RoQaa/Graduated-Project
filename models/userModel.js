@@ -1,8 +1,10 @@
 //email username passorwd passowrd confirm
 const mongoose=require('mongoose');
 const validator=require('validator');
+const mongooseIntlPhoneNumber = require('mongoose-intl-phone-number');
 const bcrypt=require('bcryptjs');
 const crypto=require('crypto');
+const otpGenerator = require('otp-generator');
 const userSchema=new mongoose.Schema({
     name:{
         type:String,
@@ -29,6 +31,13 @@ const userSchema=new mongoose.Schema({
           },
   
     },
+    phone:{
+        type:String,
+        unique:true
+    },
+    nationalFormat:{type:String},
+    internationalFormat:{type:String},
+    countryCode:{type:String},
     email:{
         type:String,
         required:[true,'user must has a email Addresse'],
@@ -54,6 +63,18 @@ const userSchema=new mongoose.Schema({
     },
     passwordResetToken:String,
     passwordResetExpires:Date,
+    passwordOtp:String,
+    passwordOtpExpires:Date,
+    birthdate:{
+        type:Date,
+        required:[true,'user must has a birth date']
+    },
+    city:{
+        type:String
+    },
+    national_id:{
+        type:String
+    },
     active:{
         type:Boolean,
         default:true
@@ -63,6 +84,7 @@ const userSchema=new mongoose.Schema({
 })
 
 // DOCUMENT MIDDLEWARE 
+
 userSchema.pre('save',async function(next){
     //only run if password modified
     if(!this.isModified('password')){
@@ -80,6 +102,16 @@ userSchema.pre('save',function(next){
     this.passwordChangedAt=Date.now()-1000; // => 1000 is 1 sec
     next();
 })
+userSchema.plugin(mongooseIntlPhoneNumber, {
+    hook: 'validate',
+    phoneNumberField: 'phone',
+    nationalFormatField: 'nationalFormat',
+    internationalFormat: 'internationalFormat',
+    countryCodeField: 'countryCode',
+});
+// userSchema.pre('save',function(){
+//     this.phone=this.nationalFormat;
+// })
 //Query Middle Wares
 userSchema.pre(/^find/,  function(next){
      this.find({active:{$ne:false}})
@@ -117,14 +149,26 @@ userSchema.methods.createPasswordRestToken = function() {
       .update(resetToken)
       .digest('hex');
   
-    console.log({ resetToken }, this.passwordResetToken);
+   // console.log({ resetToken }, this.passwordResetToken);
   
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //=> vallid for 10 minutes
   
     return resetToken;
   };
 
+userSchema.methods.generateOtp=async function(){
+    const OTP=otpGenerator.generate(process.env.OTP_LENGTH,{
+        upperCaseAlphabets: true,
+        specialChars: false
+    })
+    this.passwordOtp=crypto
+    .createHash('sha256')
+    .update(OTP)
+    .digest('hex');
+   this.passwordOtpExpires=Date.now() + 10 * 60 * 1000;
+    return OTP;
 
+}
 
 
 const User=mongoose.model('User',userSchema);
