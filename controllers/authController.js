@@ -36,15 +36,14 @@ res.cookie('jwt',token,cookieOption); // save jwt in cookie
 
 //Remove password from output
 user.password=undefined;
-
+user.token=token;
 
 res.status(statusCode).json({
     status:true,
+    message:"log in successfully",
+    data:user
+      
     
-    data:{
-      user,
-      token
-    }
 })
 
 }

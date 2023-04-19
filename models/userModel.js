@@ -80,7 +80,7 @@ const userSchema=new mongoose.Schema({
         default:true
     },
     
-    
+    token:String
 
 })
 
