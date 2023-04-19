@@ -67,7 +67,7 @@ const userSchema=new mongoose.Schema({
     passwordOtpExpires:Date,
     birthdate:{
         type:Date,
-        required:[true,'user must has a birth date']
+      //  required:[true,'user must has a birth date']
     },
     city:{
         type:String
