@@ -39,10 +39,11 @@ user.password=undefined;
 
 
 res.status(statusCode).json({
-    status:"success",
-    token,
+    status:true,
+    
     data:{
-      user
+      user,
+      token
     }
 })
 
