@@ -35,9 +35,9 @@ const userSchema=new mongoose.Schema({
         type:String,
         unique:true
     },
-    nationalFormat:{type:String},
-    internationalFormat:{type:String},
-    countryCode:{type:String},
+    nationalFormat:{type:String,trim:true},
+    internationalFormat:{type:String,trim:true},
+    countryCode:{type:String,trim:true},
     email:{
         type:String,
         required:[true,'user must has a email Addresse'],

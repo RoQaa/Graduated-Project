@@ -9,6 +9,7 @@ const {catchAsync}=require('../utils/catchAsync');
 const AppError=require('../utils/appError');
 const bcrypt=require('bcryptjs');
 const sendEmail=require('../utils/email');
+const e = require('express');
 
 // const bodyParser=require('body-parser');
 // const jsonParser=bodyParser.json();
@@ -22,7 +23,7 @@ const signToken= (id)=>{
 }
 
 
-const createSendToken=(user,statusCode,res)=>{
+const createSendToken=(user,statusCode,message,res)=>{
 const token =signToken(user.id);
 
 const cookieOption={
@@ -40,7 +41,7 @@ user.token=token;
 
 res.status(statusCode).json({
     status:true,
-    message:"log in successfully",
+    message,
     data:user
       
     
@@ -70,7 +71,7 @@ if(!newUser){
 //     expiresIn:process.env.JWT_EXPIRES_IN
 // })  //sign(payload,secret,options=expires)
 
-createSendToken(newUser,201,res);
+createSendToken(newUser,201,"sign up successfully",res);
 // const token=signToken(newUser._id);
 
 // res.status(201).json({
@@ -98,7 +99,7 @@ if(!user||!(await user.correctPassword(password,user.password) /** 34an hyrun fe
 }
 //3) if everything ok send token back to the client
   
-  createSendToken(user,200,res);
+  createSendToken(user,200,"log in successfully",res);
 // const token=signToken(user._id);
 
 // res.status(200).json({
@@ -153,23 +154,17 @@ exports.forgotPassword=catchAsync(async (req,res,next) => {
  if(!user){
   return next(new AppError('There is no user with email address.', 404));
  }
- createSendToken(user,200,res);
+ createSendToken(user,200,"email founded",res);
 })
 
 exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
-  let token;
-  if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-      token=req.headers.authorization.split(' ')[1];
-  }
-  if(!token){
-    return next(new AppError("Please Try to set email Again",401)) //401 => is not 'authorized
-  }
-  const decoded= await promisify(jwt.verify)(token,process.env.JWT_SECRET);
-  const user =  await User.findById(decoded.id);
+  // protect handler
+  const user =  req.user;
+  console.log(user);
   const OTP= await user.generateOtp();
   await user.save({ validateBeforeSave: false });
 
-  if(req.query.email){
+  if(req.body.email){
     try {
       await sendEmail({
         email: user.email,
@@ -196,7 +191,7 @@ exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
       );
       }
 }
-if(req.query.phone){
+if(req.body.phone){
   const internationalFormat=`${user.phone}`; // err
   try{
       const otpResponse =await client
@@ -221,70 +216,12 @@ if(req.query.phone){
 
 
 
-exports.forgotPasswordJ = catchAsync(async (req, res, next) => {
-    // 1) Get user based on POSTed email
-    
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return next(new AppError('There is no user with email address.', 404));
-    }
-  
-    // 2) Generate the random reset token
-    const resetToken = user.createPasswordRestToken();
-    const OTP= await user.generateOtp();
-    await user.save({ validateBeforeSave: false });
-  
-    // 3) Send it to user's email
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetPassword/${resetToken}`;
-  
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: 
-    ${resetURL}.
-    \nIf you didn't forget your password, please ignore this email!, and the OTP IS ${OTP}`;
-  
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Your password reset token (valid for 10 min)',
-        message,
-        name:user.name,
-        otp:OTP
-      });
-  
-      res.status(200).json({
-        status: 'success',
-        message: 'Token sent to email!',
-        token:resetToken
-      });
-    } catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
-    
-      return next(
-        new AppError(err),
-        500
-      );
-    }
-   
-
-  });
 
 
 
 
 exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
-  /**if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-    token=req.headers.authorization.split(' ')[1];
-} */
-if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-  token=req.headers.authorization.split(' ')[1];
-}
-  if(!req.body.otp || !token){
-    return next( new AppError("Please try  to send otp again to your mail",404));
-  }
-  
+//protect handler
   const cryptoOtp=crypto
   .createHash('sha256')
   .update(req.body.otp)
@@ -309,6 +246,8 @@ if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
 
 
 exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
+  //protect handler
+  const user =req.user;
   const otp=req.body.otp;
   try{
     const verifiedResponse = await client
@@ -316,7 +255,7 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
     .v2
     .services(process.env.TWILIO_SERVICE_SID)
     .verificationChecks.create({
-      to:`+201156582961`,
+      to:user.internationalFormat,
       code:otp,
     });
     res.status(200).json({
@@ -329,8 +268,28 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
   }
 })
 
+exports.resetPassword=catchAsync(async (req,res,next) => {
+  // protect handler
+ const user=req.user;
+ if(!user){
+  return next(new AppError("Token is invalid or has expired",400))
+}
+user.password=req.body.password;
+user.passwordConfirm=req.body.passwordConfirm;
+user.passwordResetExpires=undefined;
+user.passwordResetToken=undefined;
+user.passwordOtp=undefined;
+user.passwordOtpExpires=undefined;
+user.token=undefined;
+await user.save({validateBeforeSave:false});
+res.status(200).json({
+  status:true,
+  message:"password reset success you can now  try agin to log in"
+})
+//createSendToken(user,200,"password has changed successfully",res);
+})
 
-exports.resetPassword=catchAsync(async(req,res,next)=>{
+exports.resetPasswordJ=catchAsync(async(req,res,next)=>{
   // 1-GET USER BASED ON TOKEN
 const hashedToken=crypto.createHash('sha256').update(req.params.token).digest('hex');
 const user = await User.findOne({
@@ -356,7 +315,7 @@ await user.save({validateBeforeSave:false});
 //   status:'success',
 //   token
 // })
-    createSendToken(user,200,res);
+    createSendToken(user,200,"password has changed successfully",res);
     
 })
 
@@ -380,9 +339,58 @@ exports.updatePassword=catchAsync(async(req,res,next)=>{ //settings  hy48lha b3d
    
         await user.save({validateBeforeSave:false})
   // 4) Log user in, send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200,"password has changed successfully", res);
 
 })
 
 
 
+exports.forgotPasswordJ = catchAsync(async (req, res, next) => {
+  // 1) Get user based on POSTed email
+  
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with email address.', 404));
+  }
+
+  // 2) Generate the random reset token
+  const resetToken = user.createPasswordRestToken();
+  const OTP= await user.generateOtp();
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send it to user's email
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
+
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: 
+  ${resetURL}.
+  \nIf you didn't forget your password, please ignore this email!, and the OTP IS ${OTP}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 min)',
+      message,
+      name:user.name,
+      otp:OTP
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email!',
+      token:resetToken
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+  
+    return next(
+      new AppError(err),
+      500
+    );
+  }
+ 
+
+});
