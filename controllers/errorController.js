@@ -32,7 +32,8 @@ const sendErrorDev = (err, res) => {
     status: false,
     error: err,
     message: err.message,
-    stack: err.stack
+    stack: err.stack,
+    data:null
   });
 };
 
