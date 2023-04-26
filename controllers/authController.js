@@ -95,7 +95,7 @@ const user = await User.findOne({email:email}).select('+password'); // hyzaod el
 //const correct=await user.correctPassword(password,user.password);
 
 if(!user||!(await user.correctPassword(password,user.password) /** 34an hyrun fe el correct 7ta loo ml2hoo4*/)){
-    return next(new AppError("Incorrect email or password",200));
+    return next(new AppError("Incorrect email or password",404));
 }
 //3) if everything ok send token back to the client
   
