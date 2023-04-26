@@ -98,7 +98,7 @@ if(!user||!(await user.correctPassword(password,user.password) /** 34an hyrun fe
    // return next(new AppError("Incorrect email or password",401));
    res.status(200).json({
     status:false,
-    message:" لم نتمكن من تسجيل الدخول برجاء التأكد من البيانات المدخله "
+    message:" لم نتمكن من تسجيل الدخول برجاء التأكد من البيانات المدخله ",
     data:null
    })
 }
