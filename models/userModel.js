@@ -35,9 +35,9 @@ const userSchema=new mongoose.Schema({
         type:String,
         unique:true
     },
-    nationalFormat:{type:String,trim:true},
-    internationalFormat:{type:String,trim:true},
-    countryCode:{type:String,trim:true},
+    nationalFormat:{type:String},
+    internationalFormat:{type:String},
+    countryCode:{type:String},
     email:{
         type:String,
         required:[true,'user must has a email Addresse'],
@@ -142,20 +142,20 @@ userSchema.methods.changesPasswordAfter=function(JWTTimestamps){
 
 
 
-userSchema.methods.createPasswordRestToken = function() {
-    const resetToken = crypto.randomBytes(32).toString('hex');
+// userSchema.methods.createPasswordRestToken = function() {
+//     const resetToken = crypto.randomBytes(32).toString('hex');
   
-    this.passwordResetToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
+//     this.passwordResetToken = crypto
+//       .createHash('sha256')
+//       .update(resetToken)
+//       .digest('hex');
   
-   // console.log({ resetToken }, this.passwordResetToken);
+//    // console.log({ resetToken }, this.passwordResetToken);
   
-    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //=> vallid for 10 minutes
+//     this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //=> vallid for 10 minutes
   
-    return resetToken;
-  };
+//     return resetToken;
+//   };
 
 userSchema.methods.generateOtp=async function(){
     const OTP=otpGenerator.generate(process.env.OTP_LENGTH,{

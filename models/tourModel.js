@@ -1,6 +1,7 @@
 const mongoose=require('mongoose');
 const slugify=require('slugify');
 const validator=require('validator');
+//const User = require('./userModel'); //for  embded
 const tourSchema=new mongoose.Schema({
     name:{
         type:String,
@@ -79,7 +80,33 @@ const tourSchema=new mongoose.Schema({
         type:Boolean,
         default:false
 
-    }
+    },
+    //GeoJSON
+    startLoction:{ //sub document
+        type:{
+            type:String,
+            default:'Point',
+            enum:['Point']
+        },
+        Coordinates:[Number],
+        address:String,
+        description:String,
+    },
+    locations:[{
+        type:{
+            type:String,
+            default:'Point',
+            enum:['Point']
+        },
+        Coordinates:[Number],
+        address:String,
+        description:String,
+        day:Number
+    }],
+    guides:[{
+        type:mongoose.Schema.ObjectId,
+        ref:'User'
+    }]
 },{
     toJSON:{virtuals:true},
     toObject:{virtuals:true}
@@ -99,7 +126,13 @@ tourSchema.virtual('durationWeeks').get(function(){
 //     console.log(doc);
 //     next();
 // })
-
+// tourSchema.pre('save', async function(next){ //embded dataModel
+//     const guidePromises=this.guides.map( async id=>await User.findById(id));
+    
+//     this.guides=await Promise.all(guidePromises);
+//     console.log(guidePromises);
+//     next();
+// })
 
 //EXECUTE  QUERY MIDDLEWARE
 //tourSchema.pre('find',function(next){
