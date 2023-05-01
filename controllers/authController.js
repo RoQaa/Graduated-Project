@@ -37,12 +37,12 @@ res.cookie('jwt',token,cookieOption); // save jwt in cookie
 
 //Remove password from output
 user.password=undefined;
-//user.token=token;
+user.token=token;
 
 res.status(statusCode).json({
     status:true,
     message,
-    data:user,token
+    data:user
       
     
 })
