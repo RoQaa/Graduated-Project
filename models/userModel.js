@@ -44,7 +44,7 @@ const userSchema=new mongoose.Schema({
         unique:true,
         lowercase:true,
         //trim:true,
-        validate:[validator.isEmail,'please provide email']
+        validate:[validator.isEmail,'please provide correct email']
     },
     photo:String,
     role:{

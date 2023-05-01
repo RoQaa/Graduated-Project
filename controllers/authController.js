@@ -9,7 +9,7 @@ const {catchAsync}=require('../utils/catchAsync');
 const AppError=require('../utils/appError');
 const bcrypt=require('bcryptjs');
 const sendEmail=require('../utils/email');
-const e = require('express');
+const validator=require('validator');
 
 // const bodyParser=require('body-parser');
 // const jsonParser=bodyParser.json();
@@ -37,12 +37,12 @@ res.cookie('jwt',token,cookieOption); // save jwt in cookie
 
 //Remove password from output
 user.password=undefined;
-user.token=token;
+//user.token=token;
 
 res.status(statusCode).json({
     status:true,
     message,
-    data:user
+    data:user,token
       
     
 })
@@ -88,6 +88,10 @@ exports.login=catchAsync(async(req,res,next)=>{
 //1) check email && password exist,
 if(!email||!password){
     return next(new AppError("please provide email & password",400));
+}
+const validEmail=validator.isEmail(email);
+if(!validEmail){
+  return next(new AppError("صيغة البريد غير صحيحة"));
 }
 //2)check user exists && password is correct
 const user = await User.findOne({email:email}).select('+password'); // hyzaod el password el m5fee aslan
