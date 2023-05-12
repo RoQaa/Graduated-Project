@@ -2,7 +2,7 @@ const mongoose=require('mongoose');
 const validator =require('validator');
 const postSchema=mongoose.Schema({
     user:{
-        type:mongoose.Schema.ObjectId,
+        type:mongoose.Schema.ObjectId, //population data
         ref:'User'
     },
     description:{
@@ -15,7 +15,7 @@ postSchema.pre(/^find/,function(next){ //populting by ref
     this.populate(
         {
             path:'user',
-             select:'-__v -passwordChangedAt'
+             select:'name photo'
         }
     );
     next();

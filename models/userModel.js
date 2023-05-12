@@ -49,7 +49,7 @@ const userSchema=new mongoose.Schema({
     photo:String,
     role:{
         type:String,
-        enum:['user','guide','lead-guide','admin'],
+        enum:['user','worker','admin'],
         default:'user'
     },
     createdAt:{
@@ -61,8 +61,8 @@ const userSchema=new mongoose.Schema({
         type:Date
        
     },
-    passwordResetToken:String,
-    passwordResetExpires:Date,
+    // passwordResetToken:String,
+    // passwordResetExpires:Date,
     passwordOtp:String,
     passwordOtpExpires:Date,
     birthdate:{
@@ -80,8 +80,18 @@ const userSchema=new mongoose.Schema({
         default:true
     },
     
-    token:String
+    rating:[Number],
 
+    rateAverage:{
+        type:Number,
+        min:[1.0,'rate  must at least 1.0'], //for number and dates
+        max:[5.0,'rate  not more than 5.0'],
+    }
+   // token:String 
+
+},{
+    toJSON:{virtuals:true},
+    toObject:{virtuals:true}
 })
 
 // DOCUMENT MIDDLEWARE 
@@ -94,6 +104,7 @@ userSchema.pre('save',async function(next){
     //hash password
     this.password= await bcrypt.hash(this.password,12); 
     this.passwordConfirm=undefined;
+    
     next();
 })
 userSchema.pre('save',function(next){

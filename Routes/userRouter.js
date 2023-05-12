@@ -1,5 +1,5 @@
 const express=require('express');
-const {getAllUsers,AddUser,GetUser,UpdatedUser,DeleteUser,deletedMe}=require(`${__dirname}/../controllers/userController`);
+const {getAllUsers,AddUser,GetUser,UpdatedUser,DeleteUser,deletedMe,getAllWorkers,AddWorkerUserRate}=require(`${__dirname}/../controllers/userController`);
 const authController=require(`${__dirname}/../controllers/authController`);
 const router=express.Router();
 
@@ -15,8 +15,10 @@ router.patch('/resetpassword',authController.protect,authController.resetPasswor
 router.patch('/updatePassword',authController.protect,authController.updatePassword);
 router.patch('/updateUser',authController.protect,UpdatedUser);
 router.delete('/DeleteMe',authController.protect,deletedMe);
- 
-router.route('/')
+router.post('/rate',AddWorkerUserRate);
+
+router.route('/workers').get(getAllWorkers);
+router.route('/users')
   .get(getAllUsers)
   .post(AddUser);
  

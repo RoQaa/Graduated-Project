@@ -5,6 +5,7 @@ const helmet=require('helmet'); // security
 const mongoSanitize=require('express-mongo-sanitize'); // security
 const xss=require('xss-clean'); // security
 const hpp=require('hpp'); // security
+const fileUpload=require('express-fileupload');
 const AppError=require('./utils/appError');
 const tourRouter=require('./Routes/tourRouter');
 const userRouter=require('./Routes/userRouter');
@@ -32,7 +33,9 @@ const limiter =rateLimit({
   message:'too many requests please try again later'
 })
 
-
+app.use(fileUpload({ //for upload files
+  useTempFiles:true
+}))
 app.use('/api',limiter) // (/api)=> all routes start with /api
 
 //Body parser,reading data from body into req.body

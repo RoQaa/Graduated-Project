@@ -1,15 +1,3 @@
-//const fs=require('fs');
-//const users=JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`,'utf-8'));
-
-// exports.CheckUserId=(req,res,next)=>{
-//   if(req.params.id>users.length){
-//     return res.status(404).json({
-//       status:'Fail',
-//       message:"Invalid ID"
-//     });
-//   }
-//   next();
-// }
 const User=require(`${__dirname}/../models/userModel`);
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`${__dirname}/../utils/appError`);
@@ -36,24 +24,46 @@ exports. DeleteUser=catchAsync(async(req,res,next)=>{
    
     })
   
-exports.getAllUsers=async(req,res) => {
-  try{
-  const users=await User.find().select('+password');
+exports.getAllUsers=catchAsync(async(req,res,next) => {
+  
+  const users=await User.aggregate([
+    {
+      $match:{
+        role:"user"
+      }
+    }
+  ])
+  if(users.length===0){
+    return next(new AppError("there's no users",404));
+  }
   res.status(200).json({
-    status:"Success",
+    status:true,
     Result:users.length,
     data:users
   })
-}
-catch(err){
-  res.status(404).json({
-    status:"fail",
-    data:err
-  })
-}
-}
-  
  
+})
+exports.getAllWorkers=catchAsync(async(req,res,next) => {
+  
+  const users=await User.aggregate([
+    {
+      $match:{
+        role:"worker"
+      }
+    }
+  ])
+  if(users.length===0){
+    return next(new AppError("there's no users",404));
+  }
+  res.status(200).json({
+    status:true,
+    Result:users.length,
+    data:users
+  })
+ 
+})
+  
+ TODO:
   exports.UpdatedUser=catchAsync(async(req,res,next)=>{
     
     if(req.body.password||req.body.passwordConfirm){
@@ -71,7 +81,7 @@ catch(err){
         runValidators:true
       })
     res.status(200).json({
-      status:"success",
+      status:true,
       user:updatedUser
     })
    
@@ -84,7 +94,7 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
   })
 
   res.status(204).json({
-    status:"success",
+    status:true,
     data:null
   })
   
@@ -101,7 +111,7 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
       return next(new AppError("user not found",404));
     }
     res.status(200).json({
-      status:"success",
+      status:true,
       data:{
         user:user
       }
@@ -117,3 +127,32 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
     data:users
   })
   };
+  average=(array)=>{
+    let sum=0;
+    for(var i =0; i<array.length; i++){
+      sum+=array[i];
+    }
+    return sum/array.length;
+  }
+  exports.AddWorkerUserRate=catchAsync(async(req,res,next)=>{
+    //protect handler
+    const rate =req.body.rate;
+    const user=await User.findByIdAndUpdate(req.body.id,{
+      $push:{rating:rate}
+    },{
+      new:true,
+      runValidators:true
+    });
+    if(!user){
+      return next(new AppError("there's no user with that id",404));
+
+    }
+    
+    user.rateAverage=average(user.rating);
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status:true,
+      message:"rate added success",
+      data:user
+    })
+  })

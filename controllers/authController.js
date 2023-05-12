@@ -7,8 +7,9 @@ const client=require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILI
 const User =require('../models/userModel');
 const {catchAsync}=require('../utils/catchAsync');
 const AppError=require('../utils/appError');
-const bcrypt=require('bcryptjs');
+
 const sendEmail=require('../utils/email');
+const uploadImage=require('../utils/uploadImage');
 const validator=require('validator');
 
 // const bodyParser=require('body-parser');
@@ -37,20 +38,27 @@ res.cookie('jwt',token,cookieOption); // save jwt in cookie
 
 //Remove password from output
 user.password=undefined;
-user.token=token;
+//user.token=token;
 
 res.status(statusCode).json({
     status:true,
     message,
-    data:user
+    data:user,
+    token
       
     
 })
 
 }
 
-
 exports.SignUp=catchAsync(async(req,res,next)=>{
+  if(req?.files?.photo){
+const file=req.files.photo;
+
+ req.body.photo=await uploadImage(file.tempFilePath);
+
+  }
+  
 const newUser=await User.create(req.body//create()  and save() doc
  // {  
    // name:req.body.name,
@@ -154,11 +162,16 @@ exports.restrictTo=(...roles)=>{ //function feha paramter we 3awz a7oot feha mid
 }
 
 exports.forgotPassword=catchAsync(async (req,res,next) => {
- const user=await User.findOne({email:req.body.email});
+ const user=await User.findOne({email:req.body.email}).select('email phone');
  if(!user){
   return next(new AppError('There is no user with email address.', 404));
  }
- createSendToken(user,200,"email founded",res);
+// createSendToken(user,200,"email founded",res);
+res.status(200).json({
+  status:true,
+  message:"email Found",
+  data:user
+})
 })
 
 exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
@@ -280,11 +293,11 @@ exports.resetPassword=catchAsync(async (req,res,next) => {
 }
 user.password=req.body.password;
 user.passwordConfirm=req.body.passwordConfirm;
-user.passwordResetExpires=undefined;
-user.passwordResetToken=undefined;
+// user.passwordResetExpires=undefined;
+// user.passwordResetToken=undefined;
 user.passwordOtp=undefined;
 user.passwordOtpExpires=undefined;
-user.token=undefined;
+//user.token=undefined;
 await user.save({validateBeforeSave:false});
 res.status(200).json({
   status:true,
