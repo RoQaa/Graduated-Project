@@ -34,7 +34,8 @@ const limiter =rateLimit({
 })
 
 app.use(fileUpload({ //for upload files
-  useTempFiles:true
+  useTempFiles:true,
+  tempFileDir: "/tmp"
 }))
 app.use('/api',limiter) // (/api)=> all routes start with /api
 
