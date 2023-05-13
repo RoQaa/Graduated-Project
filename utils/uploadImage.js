@@ -1,9 +1,9 @@
 const cloudinary=require('./cloudaniry');
 uploadImage=(async(imagePath)=>{
     const options = {
-      use_filename: true,
+      use_filename: false,
       unique_filename: false,
-      overwrite: true,
+      overwrite: false,
     };
     try{
     const result=await cloudinary.uploader.upload(imagePath,options);
