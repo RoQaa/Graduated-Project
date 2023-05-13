@@ -1,8 +1,15 @@
 const Post=require('./../models/postModel');
+const User=require('./../models/userModel');
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`../utils/appError`);
 const uploadImage=require('../utils/uploadImage');
+
 exports.addPost=catchAsync(async (req,res,next) => {
+  const user= await User.findById(req.body.user); 
+  if(!user){
+    return next(new AppError("there's no user with this id",404) );
+  }
+  
   if(req?.files?.image){
     const file=req.files.image;
     
