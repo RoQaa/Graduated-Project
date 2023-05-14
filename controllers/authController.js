@@ -124,6 +124,9 @@ if(!user||!(await user.correctPassword(password,user.password) /** 34an hyrun fe
 exports.protect=catchAsync(async(req,res,next)=>{
     //1)Getting token and check it's there
 let token;
+if(req.headers.authorization==='Bearer null'){
+  return next(new AppError("Your're not logged in please log in",401));
+}
 if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
     token=req.headers.authorization.split(' ')[1];
 }
