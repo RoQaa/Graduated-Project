@@ -127,13 +127,7 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
     data:users
   })
   };
-  average=(array)=>{
-    let sum=0;
-    for(var i =0; i<array.length; i++){
-      sum+=array[i];
-    }
-    return sum/array.length;
-  }
+
   exports.AddWorkerUserRate=catchAsync(async(req,res,next)=>{
     //protect handler
     const rate =req.body.rate;
@@ -148,7 +142,7 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
 
     }
     
-    user.rateAverage=average(user.rating);
+    user.rateAverage=user.changesRateAvg(user.rating);
     await user.save({ validateBeforeSave: false });
     res.status(200).json({
       status:true,

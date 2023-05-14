@@ -151,7 +151,14 @@ userSchema.methods.changesPasswordAfter=function(JWTTimestamps){
     return false;
 }
 
-
+userSchema.methods.changesRateAvg=function(rate){  //return rate
+   let sum = 0;
+   for(let i=0; i<rate.length; i++){
+    sum+=rate[i];
+   }
+   return sum/rate.length;
+    
+}
 
 // userSchema.methods.createPasswordRestToken = function() {
 //     const resetToken = crypto.randomBytes(32).toString('hex');
