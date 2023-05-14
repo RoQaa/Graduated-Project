@@ -127,12 +127,14 @@ let token;
 if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
     token=req.headers.authorization.split(' ')[1];
 }
+
 if(!token){
-    return next(new AppError("Your're not logged in please log in",401)) //401 => is not 'authorized
+    return next(new AppError("Your're not logged in please log in",404)); //401 => is not 'authorized
+    
 }
     //2)Verification token
   const decoded= await promisify(jwt.verify)(token,process.env.JWT_SECRET);
-   
+
     //3)check if user still exist in the route
     const currentUser=await User.findById(decoded.id);
     if(!currentUser){
@@ -413,6 +415,11 @@ exports.forgotPasswordJ = catchAsync(async (req, res, next) => {
 });
 
 exports.logOut=catchAsync(async(req,res,next) => {
- const user=req.user;
- user.token=undefined;
+ 
+ //res.clearCookie('jwt');
+res.status(200).json({
+  status:true,
+  message:"You log out Successfully",
+  token:null
+})
 });

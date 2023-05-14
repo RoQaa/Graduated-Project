@@ -1,5 +1,5 @@
 const express=require('express');
-const {getAllUsers,AddUser,GetUser,UpdatedUser,DeleteUser,deletedMe,getAllWorkers,AddWorkerUserRate}=require(`${__dirname}/../controllers/userController`);
+const {getAllUsers,GetUser,UpdatedUser,DeleteUser,deletedMe,getAllWorkers,AddWorkerUserRate}=require(`${__dirname}/../controllers/userController`);
 const authController=require(`${__dirname}/../controllers/authController`);
 const router=express.Router();
 
@@ -19,9 +19,7 @@ router.post('/rate',AddWorkerUserRate);
 
 router.route('/workers').get(getAllWorkers);
 router.route('/users')
-  .get(getAllUsers)
-  .post(AddUser);
- 
+  .get(getAllUsers);
  
  
   router.route('/:id')

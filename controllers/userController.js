@@ -117,16 +117,7 @@ exports.deletedMe=catchAsync(async (req,res,next) => {
       }
     })
   })
-  exports. AddUser =(req,res)=>{
-    
-   
-  res.status(201).json({
-    status:"success",
-    results: users.length,
-    requestedTime: req.requestTime,
-    data:users
-  })
-  };
+  
 
   exports.AddWorkerUserRate=catchAsync(async(req,res,next)=>{
     //protect handler
