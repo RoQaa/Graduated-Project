@@ -10,6 +10,8 @@ const postSchema=mongoose.Schema({
     },
     image:String,
    
+},{
+    timestamps:true
 })
 postSchema.pre(/^find/,function(next){ //populting by ref
     this.populate(
