@@ -179,7 +179,7 @@ res.status(200).json({
 })
 })
 
-exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
+exports.CheckEmailOrPhone=catchAsync(async (req,res,next) => {
   if(req.body.email){
     const user =await User.findOne({email:req.body.email});
   
@@ -259,7 +259,7 @@ exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
     }
     const token =signToken(user.id);
     res.status(200).json({
-      status:"success",
+      status:true,
       message:"OTP is valid You can now reset password",
       token
     })

@@ -7,7 +7,7 @@ const router=express.Router();
 router.post('/signUp',authController.SignUp);
 router.post('/login',authController.login);
 router.post('/forgotpassword',authController.forgotPassword);
-router.post('/CheckEmailOrPassword',authController.CheckEmailOrPassword);
+router.post('/CheckEmailOrPhone',authController.CheckEmailOrPhone);
 router.post('/verifyEmailOtp',authController.verifyEmailOtp);
 router.post('/verifyPhoneOtp',authController.verifyPhoneOtp);
 router.post('/logout',authController.protect,authController.logOut);
