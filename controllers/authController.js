@@ -180,13 +180,11 @@ res.status(200).json({
 })
 
 exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
-  // protect handler
-  const user =  req.user;
-  console.log(user);
+  if(req.body.email){
+    const user =await User.findOne({email:req.body.email});
+  
   const OTP= await user.generateOtp();
   await user.save({ validateBeforeSave: false });
-
-  if(req.body.email){
     try {
       await sendEmail({
         email: user.email,
@@ -203,8 +201,8 @@ exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
       
     }
     catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
+      user.passwordOtp = undefined;
+      user.passwordOtpExpires = undefined;
       await user.save({ validateBeforeSave: false });
     
       return next(
@@ -214,6 +212,7 @@ exports.CheckEmailOrPassword=catchAsync(async (req,res,next) => {
       }
 }
 if(req.body.phone){
+  const user =await User.findOne({phone:req.body.phone});
   const internationalFormat=`${user.phone}`; // err
   try{
       const otpResponse =await client
@@ -243,7 +242,7 @@ if(req.body.phone){
 
 
 exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
-//protect handler
+  //just email otp
   const cryptoOtp=crypto
   .createHash('sha256')
   .update(req.body.otp)
@@ -258,9 +257,11 @@ exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
     if(!user){
       return next(new AppError("OTP is invalid or has expired",400))
     }
+    const token =signToken(user.id);
     res.status(200).json({
       status:"success",
-      message:"OTP is valid You can now reset password"
+      message:"OTP is valid You can now reset password",
+      token
     })
 })
 
@@ -268,8 +269,8 @@ exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
 
 
 exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
-  //protect handler
-  const user =req.user;
+  //phone and otp
+  const user =await User.findOne({phone:req.body.phone});
   const otp=req.body.otp;
   try{
     const verifiedResponse = await client
@@ -280,9 +281,11 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
       to:user.internationalFormat,
       code:otp,
     });
+    const token =signToken(user.id);
     res.status(200).json({
       message:"OTP is verified Success",
-      verify:verifiedResponse
+      verify:verifiedResponse,
+      token
     })
   }
   catch(err){
