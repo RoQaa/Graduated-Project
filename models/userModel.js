@@ -52,11 +52,11 @@ const userSchema=new mongoose.Schema({
         enum:['user','worker','admin'],
         default:'user'
     },
-    createdAt:{
-        type:Date,
-        default:Date.now(),
-        select:false// mby5li4 3l this ya4ta8l
-    },
+    // createdAt:{
+    //     type:Date,
+    //     default:Date.now(),
+    //     select:false// mby5li4 3l this ya4ta8l
+    // },
     passwordChangedAt:{
         type:Date
        
@@ -73,7 +73,9 @@ const userSchema=new mongoose.Schema({
         type:String
     },
     national_id:{
-        type:String
+        type:String,
+        required:[true,'user must have national_id'],
+        unique:true
     },
     active:{
         type:Boolean,
@@ -90,6 +92,7 @@ const userSchema=new mongoose.Schema({
    // token:String 
 
 },{
+    timestamps:true,
     toJSON:{virtuals:true},
     toObject:{virtuals:true}
 })
