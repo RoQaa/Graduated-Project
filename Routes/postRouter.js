@@ -5,6 +5,6 @@ const postController=require('../controllers/postController');
 
 router.post('/add',authController.protect,postController.addPost);
 router.get('/postTimeLine',authController.protect,postController.getPosts);
-router.get('/profilePage',authController.protect,postController.getProfilePage);
+router.get('/profilePage',postController.getProfilePage);
 router.route('/delete/:id').delete(postController.deletePost)
 module.exports=router;

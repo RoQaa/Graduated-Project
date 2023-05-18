@@ -11,7 +11,8 @@ const filterObj=(obj,...allowedFields)=>{
   return newObj;
 }
 exports.addPost=catchAsync(async (req,res,next) => {
-  const user= await User.findById(req.body.user); 
+  //protect handler
+  const user= req.user._id;
   if(!user){
     return next(new AppError("there's no user with this id",404) );
   }
@@ -22,6 +23,7 @@ exports.addPost=catchAsync(async (req,res,next) => {
      req.body.image=await uploadImage(file.tempFilePath);
     
       }
+      req.body.user=user;
   const newPost= await Post.create(req.body);
   res.status(200).json({
     status:true,
@@ -36,7 +38,8 @@ exports.getPosts=catchAsync(async (req,res,next) => {
     const allPosts= await Post.find({user:{$ne:data._id}}).populate(
               {
                  path:'user',
-                   select:'name photo'
+                   select:'name photo',
+                   
                }
           );
    
@@ -47,7 +50,6 @@ exports.getPosts=catchAsync(async (req,res,next) => {
     res.status(200).json({
       length:allPosts.length,
         status:true,
-        message:"AllPosts",
         data:allPosts
     })
   
@@ -81,9 +83,9 @@ exports.updatePost=catchAsync(async(req,res,next)=>{
 })
 
 exports.getProfilePage=catchAsync(async(req,res,next)=>{
-  //protect handler
-  const userData=req.user;
-  const posts = await Post.find({user:userData._id});
+  // post id from client
+  const userData=await User.findById(req.body.id);
+  const posts = await Post.find({user:userData.id});
   res.status(200).json({
     status:true,
     data:{
