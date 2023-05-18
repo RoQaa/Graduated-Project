@@ -3,7 +3,13 @@ const User=require('./../models/userModel');
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`../utils/appError`);
 const uploadImage=require('../utils/uploadImage');
-
+const filterObj=(obj,...allowedFields)=>{
+  const newObj={};
+  Object.keys(obj).forEach(el=>{
+      if(allowedFields.includes(el)) newObj[el]=obj[el]
+  });
+  return newObj;
+}
 exports.addPost=catchAsync(async (req,res,next) => {
   const user= await User.findById(req.body.user); 
   if(!user){
@@ -25,11 +31,21 @@ exports.addPost=catchAsync(async (req,res,next) => {
 })
 
 exports.getPosts=catchAsync(async (req,res,next) => {
-    const allPosts= await Post.find();
+  //protect handler
+  const data=req.user;
+    const allPosts= await Post.find({user:{$ne:data._id}}).populate(
+              {
+                 path:'user',
+                   select:'name photo'
+               }
+          );
+   
+   
     if(!allPosts){
         return next(new AppError("there's no posts to Get ",404))
     }
     res.status(200).json({
+      length:allPosts.length,
         status:true,
         message:"AllPosts",
         data:allPosts
@@ -48,4 +64,31 @@ exports.deletePost=catchAsync(async(req,res,next)=>{
         message:"Deleted sucessfully",
         data:null
     })
+})
+
+exports.updatePost=catchAsync(async(req,res,next)=>{
+  
+  const filterBody=filterObj(req.body,'image','description')
+  const post= await Post.findByIdAndUpdate(req.params.id,filterBody,{runValidators:true,new:true}) //params
+  if(!post){
+    return next(new AppError("there's no post with that id ",404));
+  }
+  res.status(200).json({
+    status:true,
+    message:"post updated Successfully",
+    data:post
+  })
+})
+
+exports.getProfilePage=catchAsync(async(req,res,next)=>{
+  //protect handler
+  const userData=req.user;
+  const posts = await Post.find({user:userData._id});
+  res.status(200).json({
+    status:true,
+    data:{
+      userData,
+      posts
+    }
+  })
 })

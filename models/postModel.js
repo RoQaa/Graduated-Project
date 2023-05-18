@@ -22,6 +22,9 @@ postSchema.pre(/^find/,function(next){ //populting by ref
     );
     next();
 })
+
+
+
 const Post=mongoose.model('Post',postSchema);
 
 module.exports=Post;
