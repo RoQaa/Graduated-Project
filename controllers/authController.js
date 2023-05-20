@@ -58,6 +58,12 @@ const file=req.files.photo;
  req.body.photo=await uploadImage(file.tempFilePath);
 
   }
+  if(req?.files?.photo_id){
+    const file=req.files.photo_id;
+    
+     req.body.photo_id=await uploadImage(file.tempFilePath);
+    
+      }
   
 const newUser=await User.create(req.body//create()  and save() doc
  // {  
@@ -328,8 +334,6 @@ if(!user){
 }
 user.password=req.body.password;
 user.passwordConfirm=req.body.passwordConfirm;
-user.passwordResetExpires=undefined;
-user.passwordResetToken=undefined;
 user.passwordOtp=undefined;
 user.passwordOtpExpires=undefined;
 await user.save({validateBeforeSave:false});

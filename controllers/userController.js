@@ -1,7 +1,7 @@
 const User=require(`${__dirname}/../models/userModel`);
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`${__dirname}/../utils/appError`);
-
+const uploadImage=require('../utils/uploadImage');
 
 const filterObj=(obj,...allowedFields)=>{
   const newObj={};
@@ -33,18 +33,15 @@ exports.getAllUsers=catchAsync(async(req,res,next) => {
       }
     }
   ])
-  if(users.length===0){
-    return next(new AppError("there's no users",404));
-  }
+
   res.status(200).json({
     status:true,
-    Result:users.length,
-    data:users
+     data:users
   })
  
 })
 exports.getAllWorkers=catchAsync(async(req,res,next) => {
-  
+  if(!req.body.job){
   const users=await User.aggregate([
     {
       $match:{
@@ -52,29 +49,42 @@ exports.getAllWorkers=catchAsync(async(req,res,next) => {
       }
     }
   ])
-  if(users.length===0){
-    return next(new AppError("there's no users",404));
-  }
+ 
   res.status(200).json({
+    length:users.length,
     status:true,
-    Result:users.length,
-    data:users
+   data:users
   })
  
+}
+if(req.body.job){
+  const users=await User.aggregate([
+    {
+      $match:{
+        role:"worker",
+        job:req.body.job
+      }
+    }
+  ])
+ 
+  res.status(200).json({
+    length:users.length,
+    status:true,
+   data:users
+  })
+}
 })
   
  TODO:
   exports.UpdatedUser=catchAsync(async(req,res,next)=>{
-    
-    if(req.body.password||req.body.passwordConfirm){
-      return next(
-        new AppError
-        ("Password not provided here in that route please go to update password route"
-        ,400)
-        )
-    }
-
-   const filterBody=filterObj(req.body,'name','email')
+    if(req?.files?.photo){
+      const file=req.files.photo;
+      
+       req.body.photo=await uploadImage(file.tempFilePath);
+      
+        }
+   const filterBody=filterObj(req.body,'name','email','photo')
+   
     const updatedUser= await User.findByIdAndUpdate(req.user.id,filterBody
       ,{
         new:true,
@@ -86,6 +96,7 @@ exports.getAllWorkers=catchAsync(async(req,res,next) => {
     })
    
   })
+
 
 exports.deletedMe=catchAsync(async (req,res,next) => {
   await User.findByIdAndUpdate(req.user.id,{active:false},{

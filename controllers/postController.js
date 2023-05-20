@@ -69,9 +69,14 @@ exports.deletePost=catchAsync(async(req,res,next)=>{
 })
 
 exports.updatePost=catchAsync(async(req,res,next)=>{
-  
+  if(req?.files?.image){
+    const file=req.files.image;
+    
+     req.body.image=await uploadImage(file.tempFilePath);
+    
+      }
   const filterBody=filterObj(req.body,'image','description')
-  const post= await Post.findByIdAndUpdate(req.params.id,filterBody,{runValidators:true,new:true}) //params
+  const post= await Post.findByIdAndUpdate(req.body.id,filterBody,{runValidators:true,new:true}) //post id 
   if(!post){
     return next(new AppError("there's no post with that id ",404));
   }
@@ -84,7 +89,21 @@ exports.updatePost=catchAsync(async(req,res,next)=>{
 
 exports.getProfilePage=catchAsync(async(req,res,next)=>{
   // post id from client
-  const userData=await User.findById(req.body.id);
+  const userData=await User.findById(req.body.usId);
+  const posts = await Post.find({user:userData.id});
+  res.status(200).json({
+    status:true,
+    data:{
+      userData,
+      posts
+    }
+  })
+})
+
+
+exports.getMyProfilePage=catchAsync(async(req,res,next)=>{
+  // protectHandler
+  const userData=req.user;
   const posts = await Post.find({user:userData.id});
   res.status(200).json({
     status:true,

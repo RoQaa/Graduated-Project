@@ -88,6 +88,17 @@ const userSchema=new mongoose.Schema({
         type:Number,
         min:[1.0,'rate  must at least 1.0'], //for number and dates
         max:[5.0,'rate  not more than 5.0'],
+    },
+    job:{
+        type:String,
+        //enum:[]
+    },
+    photo_id:{
+        type:String,
+        //required:true
+    },
+    ispaid:{
+        type:Boolean 
     }
    // token:String 
 
