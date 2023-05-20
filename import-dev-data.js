@@ -31,7 +31,7 @@ mongoose.connect(DB,{
   const deletedPosts=async () => {
     try{
         await Post.deleteMany();
-        console.log("Tours has been deleted successfully");
+        console.log("Posts has been deleted successfully");
         process.exit();
 
     }

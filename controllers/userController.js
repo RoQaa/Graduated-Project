@@ -30,7 +30,7 @@ exports.getAllUsers=catchAsync(async(req,res,next) => {
   const users=await User.aggregate([
     {
       $match:{
-        role:"user"
+        role:"customer"
       }
     }
   ])

@@ -52,8 +52,8 @@ const userSchema=new mongoose.Schema({
     },
     role:{
         type:String,
-        enum:['user','worker','admin'],
-        default:'user'
+        enum:['customer','worker','admin'],
+        default:'customer'
     },
     // createdAt:{
     //     type:Date,
@@ -89,7 +89,7 @@ const userSchema=new mongoose.Schema({
 
     rateAverage:{
         type:Number,
-        min:[1.0,'rate  must at least 1.0'], //for number and dates
+        min:[0.0,'rate  must at least 1.0'], //for number and dates
         max:[5.0,'rate  not more than 5.0'],
         default:0
     },
