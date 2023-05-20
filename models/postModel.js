@@ -27,7 +27,8 @@ postSchema.virtual('Time').get(function(){
     date=date.toString();
    return date.substring(16,21);
  }); 
-postSchema.pre(/^find/,function(next){ //populting by ref
+postSchema.pre(/^find/,function(next){//populting by ref
+     
     this.populate(
         {
             path:'user',

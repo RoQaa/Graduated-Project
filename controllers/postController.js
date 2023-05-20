@@ -35,14 +35,9 @@ exports.addPost=catchAsync(async (req,res,next) => {
 exports.getPosts=catchAsync(async (req,res,next) => {
   //protect handler
   const data=req.user;
-    const allPosts= await Post.find({user:{$ne:data._id}}).populate(
-              {
-                 path:'user',
-                   select:'name photo',
-                   
-               }
-          );
-   
+  
+   const allPosts=  await Post.find({user:{$ne:data._id}});
+ 
    
     if(!allPosts){
         return next(new AppError("there's no posts to Get ",404))

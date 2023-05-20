@@ -88,6 +88,7 @@ const userSchema=new mongoose.Schema({
         type:Number,
         min:[1.0,'rate  must at least 1.0'], //for number and dates
         max:[5.0,'rate  not more than 5.0'],
+        default:0
     },
     job:{
         type:String,
@@ -97,8 +98,11 @@ const userSchema=new mongoose.Schema({
         type:String,
         //required:true
     },
-    ispaid:{
+    isPaid:{
         type:Boolean 
+    },
+    address:{
+        type:String
     }
    // token:String 
 
