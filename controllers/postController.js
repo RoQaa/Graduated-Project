@@ -84,7 +84,10 @@ exports.updatePost=catchAsync(async(req,res,next)=>{
 
 exports.getProfilePage=catchAsync(async(req,res,next)=>{
   // post id from client
-  const userData=await User.findById(req.body.usId);
+  let userData=await User.findById(req.body.usId);
+  if(userData.role==='user'){
+    userData.birthdate=null;
+  }
   const posts = await Post.find({user:userData.id});
   res.status(200).json({
     status:true,
@@ -99,6 +102,9 @@ exports.getProfilePage=catchAsync(async(req,res,next)=>{
 exports.getMyProfilePage=catchAsync(async(req,res,next)=>{
   // protectHandler
   const userData=req.user;
+  if(userData.role==='user'){
+    userData.birthdate=null;
+  }
   const posts = await Post.find({user:userData.id});
   res.status(200).json({
     status:true,

@@ -9,7 +9,14 @@ const postSchema=mongoose.Schema({
     description:{
         type:String,
     },
-    image:String,
+    image:{
+        type:String,
+       
+    },
+    Activity:{
+        type:Boolean,
+        default:true
+    }
    
 },{
     timestamps:true,
@@ -29,12 +36,12 @@ postSchema.virtual('Time').get(function(){
  }); 
 postSchema.pre(/^find/,function(next){//populting by ref
      
-    this.populate(
+    this.find({Activity:{$ne:false}}).populate(
         {
             path:'user',
              select:'name photo'
         }
-    );
+    ).select('-Activity');
     next();
 })
 

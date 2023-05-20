@@ -1,4 +1,5 @@
 const User=require(`${__dirname}/../models/userModel`);
+const Post=require(`${__dirname}/../models/postModel`);
 const {catchAsync}=require(`${__dirname}/../utils/catchAsync`);
 const AppError=require(`${__dirname}/../utils/appError`);
 const uploadImage=require('../utils/uploadImage');
@@ -83,7 +84,7 @@ if(req.body.job){
        req.body.photo=await uploadImage(file.tempFilePath);
       
         }
-   const filterBody=filterObj(req.body,'name','email','photo')
+   const filterBody=filterObj(req.body,'name','email','photo','bio')
    
     const updatedUser= await User.findByIdAndUpdate(req.user.id,filterBody
       ,{
@@ -99,15 +100,18 @@ if(req.body.job){
 
 
 exports.deletedMe=catchAsync(async (req,res,next) => {
+  
   await User.findByIdAndUpdate(req.user.id,{active:false},{
     new:true,
     runValidators:true
   })
-
+  await Post.findOneAndUpdate({user:req.user.id},{Activity:false})
   res.status(204).json({
     status:true,
+    message:"deleted successfully",
     data:null
   })
+
   
 }
   )

@@ -46,7 +46,10 @@ const userSchema=new mongoose.Schema({
         //trim:true,
         validate:[validator.isEmail,'please provide correct email']
     },
-    photo:String,
+    photo:{
+        type:String,
+        default:`https://img.freepik.com/free-icon/user_318-159711.jpg?size=626&ext=jpg&ga=GA1.1.327408408.1684502086&semt=ais`
+    },
     role:{
         type:String,
         enum:['user','worker','admin'],
@@ -66,7 +69,7 @@ const userSchema=new mongoose.Schema({
     passwordOtp:String,
     passwordOtpExpires:Date,
     birthdate:{
-        type:Date,
+        type:String,
       //  required:[true,'user must has a birth date']
     },
     city:{
@@ -102,6 +105,9 @@ const userSchema=new mongoose.Schema({
         type:Boolean 
     },
     address:{
+        type:String
+    },
+    bio:{
         type:String
     }
    // token:String 
@@ -144,7 +150,7 @@ userSchema.plugin(mongooseIntlPhoneNumber, {
 // })
 //Query Middle Wares
 userSchema.pre(/^find/,  function(next){
-     this.find({active:{$ne:false}})
+     this.find({active:{$ne:false}}).select('-createdAt');
     next();
 })
 
