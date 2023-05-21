@@ -234,8 +234,9 @@ if(req.body.phone){
           channel:"sms"
       });
       res.status(200).json({
+        status:true,
           message:"OTP send successfully",
-          otp:otpResponse
+         // otp:otpResponse
       });
   }
   catch(err){
