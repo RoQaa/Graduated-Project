@@ -294,6 +294,7 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
     });
     const token =signToken(user.id);
     res.status(200).json({
+      status:true,
       message:"OTP is verified Success",
       verify:verifiedResponse,
       token
