@@ -23,6 +23,9 @@ exports.addPost=catchAsync(async (req,res,next) => {
      req.body.image=await uploadImage(file.tempFilePath);
     
       }
+      if(!req?.files?.image){
+        req.body.image=null;
+      }
       req.body.user=user;
   const newPost= await Post.create(req.body);
   res.status(200).json({

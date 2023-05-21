@@ -27,14 +27,14 @@ exports. DeleteUser=catchAsync(async(req,res,next)=>{
   
 exports.getAllUsers=catchAsync(async(req,res,next) => {
   
-  const users=await User.aggregate([
-    {
-      $match:{
-        role:"customer"
-      }
-    }
-  ])
-
+  // const users=await User.aggregate([
+  //   {
+  //     $match:{
+  //       role:"customer"
+  //     }
+  //   }
+  // ])
+const users= await User.find({role:"customer"});
   res.status(200).json({
     status:true,
      data:users
