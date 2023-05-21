@@ -88,7 +88,7 @@ if(!newUser){
 //createSendToken(newUser,201,"sign up successfully",res);
 res.status(201).json({
   status:true,
-  data:newUser
+  message:"Sign up Successfully"
 })
 // const token=signToken(newUser._id);
 
