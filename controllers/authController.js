@@ -293,7 +293,10 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
       to:user.internationalFormat,
       code:otp,
     });
-    if(verifiedResponse.valid===false){return new AppError("otp is n't correct",400);}
+    if(verifiedResponse.valid===false){res.status(401).json({
+      status:"false",
+      message:"invalid otp"
+    })}
     else{
     const token =signToken(user.id);
     res.status(200).json({
