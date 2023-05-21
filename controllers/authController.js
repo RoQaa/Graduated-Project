@@ -85,7 +85,11 @@ if(!newUser){
 //     expiresIn:process.env.JWT_EXPIRES_IN
 // })  //sign(payload,secret,options=expires)
 
-createSendToken(newUser,201,"sign up successfully",res);
+//createSendToken(newUser,201,"sign up successfully",res);
+res.status(201).json({
+  status:true,
+  data:newUser
+})
 // const token=signToken(newUser._id);
 
 // res.status(201).json({
