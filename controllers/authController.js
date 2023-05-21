@@ -280,6 +280,7 @@ exports.verifyEmailOtp=catchAsync(async(req,res,next) => {
 
 
 exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
+ 
   //phone and otp
   const user =await User.findOne({phone:req.body.phone});
   const otp=req.body.otp;
@@ -293,18 +294,19 @@ exports.verifyPhoneOtp=catchAsync(async(req,res,next)=>{
       code:otp,
     });
     if(verifiedResponse.valid===false){return new AppError("otp is n't correct",400);}
+    else{
     const token =signToken(user.id);
     res.status(200).json({
       status:true,
       message:"OTP is verified Success",
      // verify:verifiedResponse,
       token
-    })
+  })}})
   
   
  
  
-})
+
 
 exports.resetPassword=catchAsync(async (req,res,next) => {
   // protect handler
