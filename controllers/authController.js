@@ -86,7 +86,7 @@ if(!newUser){
 // })  //sign(payload,secret,options=expires)
 
 //createSendToken(newUser,201,"sign up successfully",res);
-res.status(200).json({
+res.status(201).json({
   status:true,
   message:"Sign up Successfully"
 })
