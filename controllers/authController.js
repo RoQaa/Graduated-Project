@@ -194,7 +194,7 @@ exports.CheckEmailOrPhone=catchAsync(async (req,res,next) => {
     const user =await User.findOne({email:req.body.email});
   
   const OTP= await user.generateOtp();
-  await user.save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: false }); //
     try {
       await sendEmail({
         email: user.email,
