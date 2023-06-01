@@ -196,11 +196,11 @@ exports.CheckEmailOrPhone=catchAsync(async (req,res,next) => {
     return next(new AppError("There's no Account with that Email"));
   }
   const OTP= await user.generateOtp();
-  await user.save({ validateBeforeSave: false }); //
+  await user.save({ validateBeforeSave: false }); 
     try {
       await sendEmail({
         email: user.email,
-        subject: 'Your password reset token (valid for 10 min)',
+        subject: 'Your Password (valid for 10 min)',
         name:user.name,
         otp:OTP
       });
