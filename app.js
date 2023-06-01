@@ -92,7 +92,7 @@ app.delete('/api/v1/tours/:id', DeleteTour);
 
 //Routes
 
-app.use('/',mainRouter);
+app.use('/api/v1',mainRouter);
 app.use('/api/v1/tours',tourRouter);
 app.use('/api/v1/users',userRouter);
 app.use('/api/v1/posts',postRouter);
