@@ -192,7 +192,9 @@ res.status(200).json({
 exports.CheckEmailOrPhone=catchAsync(async (req,res,next) => {
   if(req.body.email){
     const user =await User.findOne({email:req.body.email});
-  
+  if(!user){
+    return next(new AppError("There's no Account with that Email"));
+  }
   const OTP= await user.generateOtp();
   await user.save({ validateBeforeSave: false }); //
     try {
